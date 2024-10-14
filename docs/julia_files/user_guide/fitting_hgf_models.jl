@@ -45,8 +45,6 @@ using HierarchicalGaussianFiltering
 # We will define a binary 3-level HGF and its parameters
 
 hgf_parameters = Dict(
-    ("u", "category_means") => Real[0.0, 1.0],
-    ("u", "input_precision") => Inf,
     ("xprob", "volatility") => -2.5,
     ("xprob", "initial_mean") => 0,
     ("xprob", "initial_precision") => 1,
@@ -86,8 +84,6 @@ plot_trajectory!(agent, ("xbin", "prediction"))
 # Set fixed parameters. We choose to fit the evolution rate of the xprob node. 
 fixed_parameters = Dict(
     "action_noise" => 0.2,
-    ("u", "category_means") => Real[0.0, 1.0],
-    ("u", "input_precision") => Inf,
     ("xprob", "initial_mean") => 0,
     ("xprob", "initial_precision") => 1,
     ("xvol", "initial_mean") => 1,
@@ -103,23 +99,19 @@ param_priors = Dict(("xprob", "volatility") => Normal(-3.0, 0.5));
 
 # We can fit the evolution rate by inputting the variables:
 
-# Fit the actions
-fitted_model = fit_model(
-    agent,
-    param_priors,
-    inputs,
-    actions,
-    fixed_parameters = fixed_parameters,
-    verbose = true,
-    n_iterations = 10,
-)
+# Create model
+model = create_model(agent, param_priors, inputs, actions)
+
+#Fit single chain with 10 iterations
+fitted_model = fit_model(model; n_iterations = 10, n_chains = 1)
+
 set_parameters!(agent, hgf_parameters)
 
 # ## Plotting Functions
 plot(fitted_model)
 
 # Plot the posterior
-plot_parameter_distribution(fitted_model, param_priors)
+# plot_parameter_distribution(fitted_model, param_priors)
 
 
 # # Predictive Simulations with plot\_predictive\_distributions()
@@ -151,13 +143,13 @@ fitted_model =
 set_parameters!(agent, hgf_parameters)
 
 # We can place our turing chain as a our posterior in the function, and get our posterior predictive simulation plot:
-plot_predictive_simulation(
-    fitted_model,
-    agent,
-    inputs,
-    ("xbin", "prediction_mean"),
-    n_simulations = 100,
-)
+# plot_predictive_simulation(
+#     fitted_model,
+#     agent,
+#     inputs,
+#     ("xbin", "prediction_mean"),
+#     n_simulations = 100,
+# )
 
 # We can get the posterior 
 get_posteriors(fitted_model)

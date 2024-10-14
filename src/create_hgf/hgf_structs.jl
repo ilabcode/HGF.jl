@@ -40,7 +40,9 @@ struct EnhancedUpdate <: HGFUpdateType end
 #Types for specifying nonlinear transformations
 abstract type CouplingTransform end
 
-Base.@kwdef mutable struct LinearTransform <: CouplingTransform end
+Base.@kwdef mutable struct LinearTransform <: CouplingTransform
+    parameters::Dict = Dict()
+end
 
 Base.@kwdef mutable struct NonlinearTransform <: CouplingTransform
     base_function::Function
@@ -338,8 +340,6 @@ end
 Configuration of parameters in binary input node. Default category mean set to [0,1]
 """
 Base.@kwdef mutable struct BinaryInputNodeParameters
-    category_means::Vector{Union{Real}} = [0, 1]
-    input_precision::Real = Inf
     coupling_strengths::Dict{String,Real} = Dict{String,Real}()
 end
 

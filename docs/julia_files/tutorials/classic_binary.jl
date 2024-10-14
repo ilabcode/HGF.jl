@@ -21,8 +21,6 @@ inputs = CSV.read(data_path * "classic_binary_inputs.csv", DataFrame)[!, 1];
 
 # Create an HGF
 hgf_parameters = Dict(
-    ("u", "category_means") => Real[0.0, 1.0],
-    ("u", "input_precision") => Inf,
     ("xprob", "volatility") => -3,
     ("xprob", "initial_mean") => 0,
     ("xprob", "initial_precision") => 1,
@@ -54,8 +52,6 @@ plot_trajectory(agent, ("xvol", "posterior"))
 # Set fixed parameters
 fixed_parameters = Dict(
     "action_noise" => 0.2,
-    ("u", "category_means") => Real[0.0, 1.0],
-    ("u", "input_precision") => Inf,
     ("xprob", "initial_mean") => 0,
     ("xprob", "initial_precision") => 1,
     ("xvol", "initial_mean") => 1,
@@ -83,28 +79,23 @@ plot_predictive_simulation(
 # actions = CSV.read(data_path * "classic_binary_actions.csv", DataFrame)[!, 1];
 #-
 # Fit the actions
-fitted_model = fit_model(
-    agent,
-    param_priors,
-    inputs,
-    actions,
-    fixed_parameters = fixed_parameters,
-    verbose = true,
-    n_iterations = 1000,
-    n_chains = 4,
-)
+#Create model
+model = create_model(agent, param_priors, inputs, actions)
+
+#Fit single chain with 10 iterations
+fitted_model = fit_model(model; n_iterations = 1000)
 #-
 #Plot the chains
 plot(fitted_model)
 #-
 # Plot the posterior
-plot_parameter_distribution(fitted_model, param_priors)
+# plot_parameter_distribution(fitted_model, param_priors)
 #-
 # Posterior predictive plot
-plot_predictive_simulation(
-    fitted_model,
-    agent,
-    inputs,
-    ("xbin", "prediction_mean"),
-    n_simulations = 3,
-)
+# plot_predictive_simulation(
+#     fitted_model,
+#     agent,
+#     inputs,
+#     ("xbin", "prediction_mean"),
+#     n_simulations = 3,
+# )

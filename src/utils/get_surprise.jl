@@ -61,6 +61,12 @@ Equation:
 """
 function get_surprise(node::ContinuousInputNode)
 
+    #If there was no input
+    if ismissing(node.states.input_value)
+        #Return no surprise
+        return 0
+    end
+
     #Sum the predictions of the vaue parents
     parents_prediction_mean = 0
     for parent in node.edges.observation_parents
@@ -85,46 +91,27 @@ Calculate the surprise of a binary input node on seeing the last input.
 
 function get_surprise(node::BinaryInputNode)
 
+    #If there was no input
+    if ismissing(node.states.input_value)
+        #Return no surprise
+        return 0
+    end
+
     #Sum the predictions of the vaue parents
     parents_prediction_mean = 0
     for parent in node.edges.observation_parents
         parents_prediction_mean += parent.states.prediction_mean
     end
 
-    #If the input precision is infinite
-    if node.parameters.input_precision == Inf
+    #If a 1 was observed
+    if node.states.input_value == 0
+        #Get surprise
+        surprise = -log(1 - parents_prediction_mean)
 
-        #If a 1 was observed
-        if node.states.input_value == 0
-            #Get surprise
-            surprise = -log(1 - parents_prediction_mean)
-
-            #If a 0 was observed
-        elseif node.states.input_value == 1
-            #Get surprise
-            surprise = -log(parents_prediction_mean)
-        end
-
-        #If the input precision is finite
-    else
-        #Get the surprise
-        surprise =
-            -log(
-                parents_prediction_mean * pdf(
-                    Normal(
-                        node.parameters.category_means[1],
-                        node.parameters.input_precision,
-                    ),
-                    node.states.input_value,
-                ) +
-                (1 - parents_prediction_mean) * pdf(
-                    Normal(
-                        node.parameters.category_means[2],
-                        node.parameters.input_precision,
-                    ),
-                    node.states.input_value,
-                ),
-            )
+        #If a 0 was observed
+    elseif node.states.input_value == 1
+        #Get surprise
+        surprise = -log(parents_prediction_mean)
     end
 
     return surprise
@@ -136,6 +123,12 @@ end
 Calculate the surprise of a categorical input node on seeing the last input.
 """
 function get_surprise(node::CategoricalInputNode)
+
+    #If there was no input
+    if ismissing(node.states.input_value)
+        #Return no surprise
+        return 0
+    end
 
     #Get value parent
     parent = node.edges.observation_parents[1]
