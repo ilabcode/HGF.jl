@@ -12,19 +12,19 @@ using StatsPlots
 using Distributions
 
 # Get the path for the HGF superfolder
-hgf_path = dirname(dirname(pathof(HierarchicalGaussianFiltering)))
+#hgf_path = dirname(dirname(pathof(HierarchicalGaussianFiltering)))
 # Add the path to the data files
-data_path = hgf_path * "/docs/julia_files/tutorials/data/"
+data_path = "docs/julia_files/tutorials/data/"
 
 # Load the data 
 inputs = CSV.read(data_path * "classic_binary_inputs.csv", DataFrame)[!, 1];
 
 # Create an HGF
 hgf_parameters = Dict(
-    ("xprob", "volatility") => -2.5,
+    ("xprob", "volatility") => -3,
     ("xprob", "initial_mean") => 0,
     ("xprob", "initial_precision") => 1,
-    ("xvol", "volatility") => -6.0,
+    ("xvol", "volatility") => -3,
     ("xvol", "initial_mean") => 1,
     ("xvol", "initial_precision") => 1,
     ("xbin", "xprob", "coupling_strength") => 1.0,
@@ -58,11 +58,13 @@ fixed_parameters = Dict(
     ("xvol", "initial_precision") => 1,
     ("xbin", "xprob", "coupling_strength") => 1.0,
     ("xprob", "xvol", "coupling_strength") => 1.0,
-    ("xvol", "volatility") => -6.0,
 );
 
 # Set priors for parameter recovery
-param_priors = Dict(("xprob", "volatility") => Normal(-3.0, 0.5));
+param_priors = Dict(
+    ("xprob", "volatility") => Normal(-2.0, 1.0),
+    ("xvol", "volatility") => Normal(-2.0, 1.0),
+);
 #-
 # Prior predictive plot
 plot_predictive_simulation(
@@ -74,14 +76,14 @@ plot_predictive_simulation(
 )
 #-
 # Get the actions from the MATLAB tutorial
-actions = CSV.read(data_path * "classic_binary_actions.csv", DataFrame)[!, 1];
+# actions = CSV.read(data_path * "classic_binary_actions.csv", DataFrame)[!, 1];
 #-
 # Fit the actions
 #Create model
 model = create_model(agent, param_priors, inputs, actions)
 
 #Fit single chain with 10 iterations
-fitted_model = fit_model(model; n_iterations = 10, n_chains = 1)
+fitted_model = fit_model(model; n_iterations = 1000)
 #-
 #Plot the chains
 plot(fitted_model)
